@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Veranstaltung {{ veranstaltung.name }} ({{ veranstaltung.art }})</h2>
+  <p>{{ veranstaltung.beschreibung }}</p>
+  <p>Es sind folgende {{ veranstaltung.teilnahmen.count }} Teilnahmen an der Veranstaltung bekannt:</p>
+  <ul>
+    {% for t in veranstaltung.teilnahmen.all %}
+      <li>
+        {% if t.person %}
+        <a href="{% url 'Wettbewerbe:eine_person' t.person.pk %}">{{ t.name }}</a>
+        {% else %}
+          {{ t.nur_name }}
+        {% endif %}
+         - {{ t.art }}
+      </li>
+    {% endfor %}
+    {% if request.user.username == 'admin' %}
+      <li><a style="color: gray;" href="person_eintragen/">[neue Teilnahme eintragen]</a></li>
+    {% elif 'spam' %}
+      <li><a style="color: gray;" href="mich_eintragen/">[meine Teilnahme eintragen]</a></li>
+    {% endif %}
+  </ul>
+{% endblock %}

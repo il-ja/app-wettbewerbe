@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% include 'Grundgeruest/separator.html' with text="Liste der bisher eingetragenen Veranstaltungen" %}
+  <ul>
+    {% for veranstaltung in veranstaltungen %}
+    <li><a href="{% url 'Wettbewerbe:eine_veranstaltung' slug=veranstaltung.slug %}">{{ veranstaltung.name }}: {{ veranstaltung.teilnahmen.count }} Teilnahmen</a></li>
+    {% endfor %}
+  </ul>
+{% endblock %}

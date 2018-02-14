@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% include 'Grundgeruest/separator.html' with text="Liste der bisher eingetragenen Personen" %}
+  <ul>
+    {% for person in personen %}
+    <li><a href="{% url 'Wettbewerbe:eine_person' pk=person.pk %}">{{ person.name }}: {{ person.teilnahmen.count }} Teilnahmen und {{ person.erfolge.count }} Erfolge</a></li>
+    {% endfor %}
+  </ul>
+{% endblock %}

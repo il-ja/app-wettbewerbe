@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Person {{ person.name }}</h2>
+  <p>Es sind folgende {{ person.teilnahmen.count }} Teilnahmen an Veranstaltungen bekannt:</p>
+  <ul>
+    {% for t in person.teilnahmen.all %}
+      <li>
+        <a href="{% url 'Wettbewerbe:eine_veranstaltung' t.veranstaltung.slug %}">{{ t.veranstaltung }}</a> - {{ t.art }}
+      </li>
+    {% endfor %}
+  </ul>
+  <p>Es sind folgende {{ person.erfolge.count }} Erfolge bei Wettbewerben bekannt:</p>
+  <ul>
+    {% for e in person.erfolge.all %}
+      <li>
+        <a href="{% url 'Wettbewerbe:ein_wettbewerb' e.wettbewerb.slug %}">{{ e.wettbewerb }}</a> - {{ e.art }}
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

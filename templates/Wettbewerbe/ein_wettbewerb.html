@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Wettbewerb {{ wettbewerb.name }} ({{ wettbewerb.art }})</h2>
+  <p>{{ wettbewerb.beschreibung }}</p>
+  <p>Es sind folgende {{ wettbewerb.erfolge.count }} Erfolge bei diesem Wettbewerb erzielt worden:</p>
+  <ul>
+    {% for e in wettbewerb.erfolge.all %}
+      <li>
+        {% if e.person %}
+        <a href="{% url 'Wettbewerbe:eine_person' e.person.pk %}">{{ e.name }}</a>
+        {% else %}
+          {{ e.nur_name }}
+        {% endif %}
+         - {{ e.art }}
+      </li>
+    {% endfor %}
+    {% if request.user.username == 'admin' %}
+      <li><a style="color: gray;" href="person_eintragen/">[neuen Erfolg eintragen]</a></li>
+    {% elif 'spam' %}
+      <li><a style="color: gray;" href="mich_eintragen/">[meinen Erfolg eintragen]</a></li>
+    {% endif %}
+  </ul>
+{% endblock %}
