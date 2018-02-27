@@ -27,7 +27,7 @@ class Person(MinimalModel):
         related_name='personen',
     )
     wettbewerbe = models.ManyToManyField(
-        'Wettbewerb',
+        'WettbewerbKonkret',
         through='Erfolg',
         related_name='personen',
     )
@@ -69,28 +69,51 @@ class Veranstaltung(Grundklasse):
     class Meta: verbose_name_plural = 'Veranstaltungen'
 
 
-class Wettbewerb(Grundklasse):
-    """ Ein Wettbewerbsobjekt, im weitesten Sinne
+class WettbewerbPrinzipiell(Grundklasse):
+    """ Ein generisches Wettbewerbsobjekt, zeitlos
 
-    Eine Instanz im Wettbewerbsbaum, z.B. eine Stufe oder Klausurrunde
+    Eine Instanz im Netz der Wettbewerbe, z.B. LaMO Sachsen 9.Klasse
+    Hat in jedem Jahr ein verknüpftes WettbewerbKonkret-Objekt
     """
-    art = models.ForeignKey(
-        'ArtWettbewerb',
-        null=True,
-        on_delete=models.PROTECT,
-    )
-    gehoert_zu = models.ForeignKey(
-        'Wettbewerb',
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name='abgeleitete_instanzen',
-    )
-    beschreibung = models.TextField(default='', blank=True)
+    slug_prefix = models.SlugField()
     datum = models.CharField(
         max_length=255,
         default='',
         blank=True,
+    )
+    fortsetzung = models.ForeignKey(
+        'WettbewerbPrinzipiell',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='vorheriger',
+    )
+    erfolgsarten = models.ManyToManyField(
+        'ArtErfolg',
+        blank=True,
+        related_name='wettbewerbsarten',
+    )
+    class Meta:
+        verbose_name = 'Generischer Wettbewerb'
+        verbose_name_plural = 'Wettbewerbe Generisch'
+
+
+class WettbewerbKonkret(Grundklasse):
+    """ Ein konkretes Wettbewerbsobjekt, in das man sich eintragen kann
+
+    Gehört zu einem WettbewerbGenerisch
+    """
+    beschreibung = models.TextField(default='', blank=True)
+    jahrgang = models.PositiveSmallIntegerField()
+    datum = models.CharField(
+        max_length=255,
+        default='',
+        blank=True,
+    )
+    wettbewerb = models.ForeignKey(
+        'WettbewerbPrinzipiell',
+        on_delete=models.CASCADE,
+        related_name='jahrgaenge',
     )
     veranstaltung = models.ForeignKey(
         'Veranstaltung',
@@ -99,7 +122,9 @@ class Wettbewerb(Grundklasse):
         on_delete=models.SET_NULL,
         related_name='wettbewerbe',
     )
-    class Meta: verbose_name_plural = 'Wettbewerbe'
+    class Meta:
+        verbose_name = 'Konkreter Wettbewerb'
+        verbose_name_plural = 'Wettbewerbe Konkret'
 
 
 class Teilnahme(MinimalModel):
@@ -181,7 +206,7 @@ class Erfolg(MinimalModel):
         blank=True,
     )
     wettbewerb = models.ForeignKey(
-        Wettbewerb,
+        WettbewerbKonkret,
         on_delete=models.CASCADE,
         related_name='erfolge',
     )
@@ -243,17 +268,6 @@ class ArtVeranstaltung(Grundklasse):
         verbose_name = 'Art von Veranstaltungen'
         verbose_name_plural = 'Arten der Veranstaltungen'
 
-class ArtWettbewerb(Grundklasse):
-    """ Stufe, ...; bestimmt, welche Erfolgsarten es gibt """
-    erfolgsarten = models.ManyToManyField(
-        'ArtErfolg',
-        blank=True,
-        related_name='wettbewerbsarten',
-    )
-    class Meta:
-        verbose_name = 'Art von Wettbewerben'
-        verbose_name_plural = 'Arten der Wettbewerbe'
-
 class ArtTeilnahme(Grundklasse):
     """ Bezeichnung der Art: Teilnehmer, Organisator """
     class Meta:
@@ -266,8 +280,25 @@ class ArtErfolg(Grundklasse):
         verbose_name = 'Erfolgsart'
         verbose_name_plural = 'Arten von Erfolgen'
 
+class ArtTag(Grundklasse):
+    """ Art: Wettbewerb, Bundesland, Klassenstufe, ...? """
+    class Meta:
+        verbose_name = 'Art des Tags'
+        verbose_name_plural = 'Arten von Tags'
+
 class Tag(Grundklasse):
-    """ Bezeichnung der Art: Teilnehmer, Organisator """
+    """ Tags von Wettbewerben: Matheolympiade, Sachsen, etc. """
+    art = models.ForeignKey(
+        ArtTag,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name='tags',
+    )
+    wettbewerbe = models.ManyToManyField(
+        WettbewerbPrinzipiell,
+        blank=True,
+        related_name='tags',
+    )
     class Meta:
         verbose_name = 'Tag'
         verbose_name_plural = 'Tags'

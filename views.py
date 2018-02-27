@@ -1,4 +1,5 @@
 from django.views.generic import ListView, DetailView, CreateView
+from django.shortcuts import get_object_or_404
 from . import models
 
 # Create your views here.
@@ -8,7 +9,7 @@ class IndexView(ListView):
     def get_queryset(self):
         """ gibt dict mit Listen der Objekte zurück """
         return {
-            'wettbewerbe': models.Wettbewerb.objects.all(),
+            'wettbewerbe': models.WettbewerbKonkret.objects.all(),
             'veranstaltungen': models.Veranstaltung.objects.all(),
         }
 
@@ -17,7 +18,7 @@ class IndexView(ListView):
 
 class ListeWettbewerbe(ListView):
     """ zeigt Liste der Wettbewerbe an :) """
-    model = models.Wettbewerb
+    model = models.WettbewerbKonkret
     template_name = 'Wettbewerbe/liste_wettbewerbe.html'
     context_object_name = 'wettbewerbe'
 
@@ -34,10 +35,26 @@ class ListePersonen(ListView):
     context_object_name = 'personen'
 
 class EinWettbewerb(DetailView):
-    """ spam-implementierung """
-    model = models.Wettbewerb
+    """ Gibt einen konkreten Wettbewerb zurück """
+    def get_object(self, *args, **kwargs):
+        wettbewerb = get_object_or_404(
+            models.WettbewerbPrinzipiell,
+            slug=self.kwargs['slug'],
+            slug_prefix=self.kwargs['slug_prefix'],
+        )
+        return wettbewerb
+
     template_name = 'Wettbewerbe/ein_wettbewerb.html'
     context_object_name = 'wettbewerb'
+
+class EinWettbewerbKonkret(EinWettbewerb):
+    def get_object(self, *args, **kwargs):
+        wettbewerb = super().get_object(*args, **kwargs)
+        return get_object_or_404(
+            wettbewerb.jahrgaenge,
+            jahrgang=int(self.kwargs['jahrgang']),
+        )
+
 
 class EineVeranstaltung(DetailView):
     """ spam-implementierung """

@@ -3,6 +3,19 @@ from . import views
 
 app_name = 'Wettbewerbe'
 
+# Hilfspatterns gruppiert
+wettbewerbe_urls = [
+    url(r'^(?P<slug_prefix>[\w-]+)/(?P<jahrgang>[1-9]+)/(?P<slug>[\w-]+)$',
+        views.EinWettbewerbKonkret.as_view(),
+        name='ein_wettbewerb_konkret',
+    ),
+    url(r'^(?P<slug_prefix>[\w-]+)/(?P<slug>[\w-]+)$',
+        views.EinWettbewerb.as_view(),
+        name='ein_wettbewerb_generisch',
+    ),
+]
+
+# Die unmittelbar genutzten url-patterns
 urlpatterns = [
     # Übersichtsseiten:
     url(r'^$', views.IndexView.as_view(), name='index'),
@@ -19,10 +32,7 @@ urlpatterns = [
         name='liste_personen',
     ),
     # Detailseiten:
-    url(r'^wettbewerb/(?P<slug>[\w-]+)/$',
-        views.EinWettbewerb.as_view(),
-        name='ein_wettbewerb',
-    ),
+    url(r'^wettbewerb/', include(wettbewerbe_urls)),
     url(r'^veranstaltung/(?P<slug>[\w-]+)/$',
         views.EineVeranstaltung.as_view(),
         name='eine_veranstaltung',
@@ -41,3 +51,4 @@ urlpatterns = [
         name='mich_eintragen_veranstaltung',
     ),
 ]
+
