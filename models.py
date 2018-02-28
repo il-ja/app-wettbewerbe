@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.urls import reverse
 
 from django.db import models
 from Grundgeruest.models import Grundklasse, MinimalModel
@@ -93,12 +94,19 @@ class WettbewerbPrinzipiell(Grundklasse):
         blank=True,
         related_name='wettbewerbsarten',
     )
+
+    def get_absolute_url(self):
+        return reverse('Wettbewerbe:ein_wettbewerb_generisch', kwargs=dict(
+            slug_prefix=self.wettbewerb.slug_prefix,
+            slug=self.wettbewerb.slug,
+        ))
+
     class Meta:
         verbose_name = 'Generischer Wettbewerb'
         verbose_name_plural = 'Wettbewerbe Generisch'
 
 
-class WettbewerbKonkret(Grundklasse):
+class WettbewerbKonkret(MinimalModel):
     """ Ein konkretes Wettbewerbsobjekt, in das man sich eintragen kann
 
     Gehört zu einem WettbewerbGenerisch
@@ -122,6 +130,28 @@ class WettbewerbKonkret(Grundklasse):
         on_delete=models.SET_NULL,
         related_name='wettbewerbe',
     )
+
+    @property
+    def name(self):
+        if self.jahrgang < 1000:
+            return "%s. %s" % (self.jahrgang, self.wettbewerb.name)
+        else:
+            return "%s %s" % (self.wettbewerb.name, self.jahrgang)
+
+    def __str__(self):
+        return "Jahrgang {nr} von {wettbewerb}, geändert {datum}".format(
+            nr=self.jahrgang,
+            wettbewerb=self.wettbewerb.name,
+            datum=self.zeit_geaendert,
+        )
+
+    def get_absolute_url(self):
+        return reverse('Wettbewerbe:ein_wettbewerb_konkret', kwargs=dict(
+            slug_prefix=self.wettbewerb.slug_prefix,
+            jahrgang=str(self.jahrgang),
+            slug=self.wettbewerb.slug,
+        ))
+
     class Meta:
         verbose_name = 'Konkreter Wettbewerb'
         verbose_name_plural = 'Wettbewerbe Konkret'
@@ -234,7 +264,7 @@ class Erfolg(MinimalModel):
                 "Es darf nur Person *oder* nur_name eingetragen sein!"
             ))
 
-        if not self.art in self.wettbewerb.art.erfolgsarten.all():
+        if not self.art in self.wettbewerb.wettbewerb.erfolgsarten.all():
             raise(ValidationError(
                 "Art des Erfolges muss vom Wettbewerb erlaubt sein!"
             ))

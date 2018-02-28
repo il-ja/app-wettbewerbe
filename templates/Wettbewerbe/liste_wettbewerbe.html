@@ -4,7 +4,7 @@
   {% include 'Grundgeruest/separator.html' with text="Liste der bisher eingetragenen Wettbewerbe" %}
   <ul>
     {% for wettbewerb in wettbewerbe %}
-    <li><a href="{% url 'Wettbewerbe:ein_wettbewerb' slug=wettbewerb.slug %}">{{ wettbewerb.name }}: {{ wettbewerb.erfolge.count }} Einträge</a></li>
+    <li><a href={{ wettbewerb.get_absolute_url }}>{{ wettbewerb.name }}: {{ wettbewerb.erfolge.count }} Einträge</a></li>
     {% endfor %}
   </ul>
 {% endblock %}

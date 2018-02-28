@@ -2,6 +2,8 @@ from django.views.generic import ListView, DetailView, CreateView
 from django.shortcuts import get_object_or_404
 from . import models
 
+import ipdb
+
 # Create your views here.
 
 class IndexView(ListView):
