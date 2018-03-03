@@ -51,4 +51,3 @@ urlpatterns = [
         name='mich_eintragen_veranstaltung',
     ),
 ]
-

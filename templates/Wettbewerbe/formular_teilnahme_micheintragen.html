@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<p> {{ form.instance.person.name }}, Sie nehmen an {{ form.instance.veranstaltung }} teil? </br>Bitte wählen Sie die Art der Teilnahme!:</p>
+  <form method="post" action="">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Teilnahme eintragen!">
+  </form>
+{% endblock content %}

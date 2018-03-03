@@ -1,6 +1,6 @@
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.contrib.auth import get_user_model
 
 from django.db import models
 from Grundgeruest.models import Grundklasse, MinimalModel
@@ -32,10 +32,8 @@ class Person(MinimalModel):
         through='Erfolg',
         related_name='personen',
     )
-    # TODO: vereinfachen bei upgrade auf django 1.11
-    AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
     nutzer = models.OneToOneField(
-        AUTH_USER_MODEL,
+        get_user_model(),
         null=True,
         blank=True,
         on_delete=models.CASCADE,

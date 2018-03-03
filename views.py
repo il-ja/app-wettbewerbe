@@ -1,5 +1,7 @@
 from django.views.generic import ListView, DetailView, CreateView
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 from . import models
 
 import ipdb
@@ -70,11 +72,57 @@ class EinePerson(DetailView):
     template_name = 'Wettbewerbe/eine_person.html'
     context_object_name = 'person'
 
-class EintragenInVeranstaltung(CreateView):
-    """ spam-implementierung """
+class EintragenInVeranstaltung(LoginRequiredMixin, CreateView):
+    """ zum Eintragen des Nutzers in eine übergebene Veranstaltung
+    
+    Leitet zum login weiter, falls man nicht angemeldet ist.
+    Öffnet Formular, in dem man die Art der Teilnahme wählen kann. """
+    login_url = '/login/'
     model = models.Teilnahme
-    template_name = 'Wettbewerbe/eine_veranstaltung.html'
-    context_object_name = 'veranstaltung'
+    template_name = 'Wettbewerbe/formular_teilnahme_micheintragen.html'
+    fields = ['art']
+
+    def dispatch(self, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return self.handle_no_permission() # aus LoginRequiredMixin
+        nutzer = self.request.user
+        if not nutzer.person:
+            self.person = models.Person.erstellen(nutzer)
+        else:
+            self.person = nutzer.person
+        return super().dispatch(*args, **kwargs)
+
+    def get_success_url(self):
+        return reverse(
+            'Wettbewerbe:eine_veranstaltung',
+            kwargs={'slug': self.kwargs['slug']}
+        )
+
+    def get_form_kwargs(self):
+        """ kwargs für die Initialisiegung der form zurückgeben
+
+        erstellt eine Teilnahme und übergibt sie als instance-Argument
+        dem Formular zusätzlich zu sonst übergebenen kwargs, sodass
+        die form gleich bei erstellung bound ist. """
+        kwargs = super().get_form_kwargs()
+        veranstaltung = get_object_or_404(
+            models.Veranstaltung,
+            slug=self.kwargs['slug']
+        )
+        person = self.person
+        instanz = models.Teilnahme(
+            veranstaltung=veranstaltung,
+            person=person,
+        )
+        kwargs.update([('instance', instanz)])
+        return kwargs
+
+    def get_form(self, *args, **kwargs):
+        form = super().get_form(*args, **kwargs)
+        form.fields['art'].queryset = \
+            form.instance.veranstaltung.art.teilnahmearten.all()
+        return form
+
 
 class EintragenInWettbewerb(CreateView):
     """ spam-implementierung """
