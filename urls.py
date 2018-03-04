@@ -13,6 +13,10 @@ wettbewerbe_urls = [
         views.EinWettbewerb.as_view(),
         name='ein_wettbewerb_generisch',
     ),
+    url(r'^(?P<slug_prefix>[\w-]+)/(?P<jahrgang>[1-9]+)/(?P<slug>[\w-]+)/mich_eintragen/$',
+        views.EintragenInWettbewerb.as_view(),
+        name='mich_eintragen_wettbewerb',
+    ),
 ]
 
 # Die unmittelbar genutzten url-patterns
@@ -41,11 +45,7 @@ urlpatterns = [
         views.EinePerson.as_view(),
         name='eine_person',
     ),
-    # Formulare:
-    url(r'^wettbewerb/(?P<slug>[\w-]+)/mich_eintragen/$',
-        views.EintragenInWettbewerb.as_view(),
-        name='mich_eintragen_wettbewerb',
-    ),
+    # sonstige Formulare:
     url(r'^veranstaltung/(?P<slug>[\w-]+)/mich_eintragen/$',
         views.EintragenInVeranstaltung.as_view(),
         name='mich_eintragen_veranstaltung',

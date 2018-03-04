@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
 from django.db import models
@@ -99,6 +100,15 @@ class WettbewerbPrinzipiell(Grundklasse):
             slug=self.wettbewerb.slug,
         ))
 
+    @classmethod
+    def objekt_aus_kwargs(cls, kwargs):
+        wettbewerb = get_object_or_404(
+            cls,
+            slug=kwargs['slug'],
+            slug_prefix=kwargs['slug_prefix'],
+        )
+        return wettbewerb
+
     class Meta:
         verbose_name = 'Generischer Wettbewerb'
         verbose_name_plural = 'Wettbewerbe Generisch'
@@ -150,12 +160,90 @@ class WettbewerbKonkret(MinimalModel):
             slug=self.wettbewerb.slug,
         ))
 
+    @classmethod
+    def objekt_aus_kwargs(cls, kwargs):
+        wettbewerb = WettbewerbPrinzipiell.objekt_aus_kwargs(kwargs)
+        return get_object_or_404(
+            wettbewerb.jahrgaenge,
+            jahrgang=int(kwargs['jahrgang']),
+        )
+
     class Meta:
         verbose_name = 'Konkreter Wettbewerb'
         verbose_name_plural = 'Wettbewerbe Konkret'
 
 
-class Teilnahme(MinimalModel):
+class Verknuepfung(MinimalModel):
+    nur_name = models.CharField( # falls Person nicht eingetragen, nur str
+        max_length=99,
+        blank=True,
+    )
+    ########### das sollten erbende Klassen neben ihren model-fields definieren:
+    def erlaubte_arten(self):
+        return self.veranstaltung.art.teilnahmearten.all()
+
+    verknuepft = ('veranstaltung', Veranstaltung)
+
+    @classmethod
+    def neu_zu_objekt(cls, objekt):
+        """ Erstellt eine Instanz mit verknüpften objekt, ohne zu speichern
+
+        muss so unDRY definiert werden, da der normale Konstruktor keine
+        positional arguments akzeptiert und auch self.verknuepft[1] als
+        key nicht zulässig ist.
+        """
+        return cls(veranstaltung=objekt)
+    ############
+    @classmethod
+    def erstellen(cls, person, objekt):
+        instanz = cls.neu_zu_objekt(objekt)
+        instanz.person = person
+        return instanz
+
+    @property
+    def objekt(self):
+        return getattr(self, self.verknuepft[0])
+
+    @property
+    def name(self):
+        try:
+            return self.nur_name or self.person.name
+        except AttributeError:
+            return "weder nur_name noch person eingetragen"
+
+    def __str__(self):
+        name = self.person or self.nur_name or '?'
+        return '{} - {}'.format(name, self.objekt)
+
+
+    def save(self, *args, **kwargs):
+        """ Führt vor dem save() Validierungen durch """
+        if self.nur_name and self.person:
+            raise(ValidationError(
+                "Es darf nur Person *oder* nur_name eingetragen sein!"
+            ))
+
+        if not self.art in self.erlaubte_arten():
+            raise(ValidationError(
+                "Art muss von %s erlaubt sein!" % self.__class__.__name__
+            ))
+
+        # guckt ob bei demselben „Event“ schon jemand mit gleichem Namen ist
+        if (self.name in [t.name for t in self.objekt.personen.all()]):
+            raise(ValidationError(
+                "Es gibt schon eine Teilnahme von {name} an {event}".format(
+                    name=self.name,
+                    event=self.objekt,
+                )
+            ))
+
+        super().save(*args, **kwargs)
+
+    class Meta:
+        abstract = True
+
+
+class Teilnahme(Verknuepfung):
     """ Verknüpft Person mit Veranstaltung, gehört zu einer Art """
     person = models.ForeignKey(
         Person,
@@ -163,10 +251,6 @@ class Teilnahme(MinimalModel):
         blank=True,
         on_delete=models.CASCADE,
         related_name='teilnahmen',
-    )
-    nur_name = models.CharField( # falls Person nicht eingetragen, nur str
-        max_length=99,
-        blank=True,
     )
     veranstaltung = models.ForeignKey(
         Veranstaltung,
@@ -180,39 +264,16 @@ class Teilnahme(MinimalModel):
     )
     ob_weitergekommen = models.BooleanField(default=False)
 
-    @property
-    def name(self):
-        try:
-            return self.nur_name or self.person.name
-        except AttributeError:
-            return "weder nur_name noch person eingetragen"
+    ############ das braucht die parent-Klasse zum weiterverarbeiten
+    verknuepft = ('veranstaltung', Veranstaltung)
 
-    def __str__(self):
-        name = self.person or self.nur_name or '?'
-        return '{} - {}'.format(name, self.veranstaltung)
+    @classmethod
+    def neu_zu_objekt(cls, objekt):
+        return cls(veranstaltung=objekt)
 
-    def save(self, *args, **kwargs):
-        """ Führt vor dem save() Validierungen durch """
-        if self.nur_name and self.person:
-            raise(ValidationError(
-                "Es darf nur Person *oder* nur_name eingetragen sein!"
-            ))
-
-        if not self.art in self.veranstaltung.art.teilnahmearten.all():
-            raise(ValidationError(
-                "Art der Teilnahme muss von Veranstaltung erlaubt sein!"
-            ))
-
-        # guckt ob bei derselben V. schon jemand mit gleichem Namen ist
-        if (self.name in [t.name for t in self.veranstaltung.teilnahmen.all()]):
-            raise(ValidationError(
-                "Es gibt schon eine Teilnahme von {name} an {v}".format(
-                    name=self.name,
-                    v=self.veranstaltung,
-                )
-            ))
-
-        super().save(*args, **kwargs)
+    def erlaubte_arten(self):
+        return self.veranstaltung.art.teilnahmearten.all()
+    ############
 
     class Meta:
         unique_together = ('person', 'veranstaltung')
@@ -220,7 +281,7 @@ class Teilnahme(MinimalModel):
         verbose_name_plural = 'Konkrete Teilnahmen'
 
 
-class Erfolg(MinimalModel):
+class Erfolg(Verknuepfung):
     """ Verknüpft Person mit Wettbewerb, gehört zu einer Art """
     person = models.ForeignKey(
         Person,
@@ -228,10 +289,6 @@ class Erfolg(MinimalModel):
         blank=True,
         on_delete=models.CASCADE,
         related_name='erfolge',
-    )
-    nur_name = models.CharField( # falls Person nicht eingetragen, nur str
-        max_length=99,
-        blank=True,
     )
     wettbewerb = models.ForeignKey(
         WettbewerbKonkret,
@@ -244,39 +301,16 @@ class Erfolg(MinimalModel):
         null=True,
     )
 
-    @property
-    def name(self):
-        try:
-            return self.nur_name or self.person.name
-        except AttributeError:
-            return "weder nur_name noch person eingetragen"
+    ############ das braucht die parent-Klasse zum weiterverarbeiten
+    verknuepft = ('wettbewerb', WettbewerbKonkret)
 
-    def __str__(self):
-        name = self.person or self.nur_name or '?'
-        return '{} - {}'.format(name, self.wettbewerb)
+    @classmethod
+    def neu_zu_objekt(cls, objekt):
+        return cls(wettbewerb=objekt)
 
-    def save(self, *args, **kwargs):
-        """ Führt vor dem save() Validierungen durch """
-        if self.nur_name and self.person:
-            raise(ValidationError(
-                "Es darf nur Person *oder* nur_name eingetragen sein!"
-            ))
-
-        if not self.art in self.wettbewerb.wettbewerb.erfolgsarten.all():
-            raise(ValidationError(
-                "Art des Erfolges muss vom Wettbewerb erlaubt sein!"
-            ))
-
-        # guckt ob bei demselben W. schon jemand mit gleichem Namen ist
-        if (self.name in [e.name for e in self.wettbewerb.erfolge.all()]):
-            raise(ValidationError(
-                "Es gibt schon einen Erfolg von {name} bei {w}".format(
-                    name=self.name,
-                    v=self.wettbewerb,
-                )
-            ))
-
-        super().save(*args, **kwargs)
+    def erlaubte_arten(self):
+        return self.wettbewerb.wettbewerb.erfolgsarten.all()
+    #############
 
     class Meta:
         unique_together = ('person', 'wettbewerb')
