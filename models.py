@@ -68,6 +68,11 @@ class Veranstaltung(Grundklasse):
     datum_ende = models.DateField(null=True, blank=True)
     class Meta: verbose_name_plural = 'Veranstaltungen'
 
+    def get_absolute_url(self):
+        return reverse('Wettbewerbe:eine_veranstaltung', kwargs=dict(
+            slug=self.slug,
+        ))
+
 
 class WettbewerbPrinzipiell(Grundklasse):
     """ Ein generisches Wettbewerbsobjekt, zeitlos
