@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 
 from django.db import models
 from Grundgeruest.models import Grundklasse, MinimalModel
+from Kommentare.models import Liste
 
 
 """ Es werden folgende models definiert:
@@ -388,3 +389,57 @@ class Tag(Grundklasse):
         return reverse('Wettbewerbe:tag_detail', kwargs=dict(
             slug=self.slug,
         ))
+
+
+class Kommentarliste(models.Model):
+    """ Verbindet Liste aus der Kommentare-app mit Objekten """
+    liste = models.OneToOneField(
+        Liste,
+        on_delete=models.CASCADE,
+        related_name='objekt',
+    )
+    veranstaltung = models.OneToOneField(
+        Veranstaltung,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name='kommentarliste',
+    )
+    wettbewerb = models.OneToOneField(
+        WettbewerbKonkret,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name='kommentarliste',
+    )
+    tag = models.OneToOneField(
+        Tag,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name='kommentarliste',
+    )
+
+    objektarten = [veranstaltung, wettbewerb, tag]
+
+    @property
+    def kommentare(self):
+        return self.liste.kommentare.all()
+
+    def save(self, *args, **kwargs):
+        """ Validierung vor dem save()
+
+        Setzt self.objekt auf das verknüpfte Objekt und wirft Fehler, falls
+        mehrere arten verknüpft wurden.
+        """
+        for art in self.objektarten:
+            if hasattr(self, art):
+                if hasattr(self, 'objekt'):
+                    raise(ValidationError(
+                        "Kommentarliste darf nur zu %s gehören!" % "*oder*".join(self.objektarten)
+                    ))
+                else:
+                    self.objekt = getattr(self, art)
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.objekt.__str__()
+
