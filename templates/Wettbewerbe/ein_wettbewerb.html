@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h2>Wettbewerb {{ wettbewerb.name }} ({{ wettbewerb.art }})</h2>
+  <h2>Wettbewerb {{ wettbewerb.name }}</h2>
   <p>{{ wettbewerb.beschreibung }}</p>
   <p>Es sind folgende {{ wettbewerb.erfolge.count }} Erfolge bei diesem Wettbewerb erzielt worden:</p>
   <ul>
     {% for e in wettbewerb.erfolge.all %}
       <li>
         {% if e.person %}
-        <a href="{% url 'Wettbewerbe:eine_person' e.person.pk %}">{{ e.name }}</a>
+        <a href="{% url 'Wettbewerbe:eine_person' e.person.pk %}">{{ e.person.name }}</a>
         {% else %}
           {{ e.nur_name }}
         {% endif %}
-         - {{ e.art }}
+         - {{ e.name }}
       </li>
     {% endfor %}
     {% if request.user.username == 'admin' %}
@@ -21,4 +21,40 @@
       <li><a style="color: gray;" href="mich_eintragen/">[meinen Erfolg eintragen]</a></li>
     {% endif %}
   </ul>
+
+  {# Links zur Veranstaltung und anderen Wettbewerben der Veranstaltung #}
+  {% if wettbewerb.veranstaltung %}
+  Der Wettbewerb hat im Rahmen der Veranstaltung <a href={{ wettbewerb.veranstaltung.get_absolute_url }}>{{ wettbewerb.veranstaltung.name }}</a> stattgefunden.
+    {% ifnotequal wettbewerb.veranstaltung.wettbewerbe.count 1 %}
+    Weitere Wettbewerbe auf dieser Veranstaltung:
+    <ul>
+      {% for w in wettbewerb.veranstaltung.wettbewerbe.all %}
+        {% ifnotequal w wettbewerb %}
+          <li><a href={{ w.get_absolute_url }}>{{ w.name }}</a></li>
+        {% endifnotequal %}
+      {% endfor %}
+    </ul>
+    {% endifnotequal %}
+  {% endif %}
+
+  {# Link zur nächsten/vorherigen Runde #}
+  {% if fortsetzung %}
+    zur nächsten Runde: <a href={{ fortsetzung.get_absolute_url }}>{{ fortsetzung.name }}</a>
+  {% endif %}
+  {% if vorherige %}
+    zu Wettbewerben der vorherigen Runde:
+    {% for w in vorherige %}
+      <ul>
+        <li><a href={{ w.get_absolute_url }}>{{ w.name }}</a></li>
+      </ul>
+    {% endfor %}
+  {% endif %}
+  {% if nachbarn %}
+    gleichzeitig finden andere Wettbewerbe zu dieser Wettbewerbsrunde statt:
+    <ul>
+      {% for w in nachbarn %}
+        <li><a href={{ w.get_absolute_url }}>{{ w.name }}</a></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
 {% endblock %}

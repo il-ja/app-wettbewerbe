@@ -1,6 +1,7 @@
 from django.views.generic import ListView, DetailView, CreateView
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from . import models
@@ -13,7 +14,7 @@ class IndexView(ListView):
     """ zeigt die Startseite an :) """
     def get_queryset(self):
         """ gibt dict mit Listen der Objekte zurück """
-        liste=[
+        liste = [
             ('konkreten wettbewerbe', models.WettbewerbKonkret.objects.all()),
             ('veranstaltungen', models.Veranstaltung.objects.all()),
         ]
@@ -55,6 +56,26 @@ class EinWettbewerb(DetailView):
 class EinWettbewerbKonkret(EinWettbewerb):
     model = models.WettbewerbKonkret
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ich = self.get_object()
+        try:
+            context['fortsetzung'] = models.WettbewerbKonkret.objects.get(
+                wettbewerb=ich.wettbewerb.fortsetzung,
+                jahrgang=ich.jahrgang
+            )
+        except:
+            context['fortsetzung'] = False
+        context['vorherige'] = models.WettbewerbKonkret.objects.filter(
+            wettbewerb__fortsetzung=ich.wettbewerb,
+            jahrgang=ich.jahrgang
+        )
+        context['nachbarn'] = models.WettbewerbKonkret.objects.filter(
+            wettbewerb__fortsetzung=ich.wettbewerb.fortsetzung,
+            jahrgang=ich.jahrgang
+        ).exclude(pk=ich.pk)
+        return context
+
 class EineVeranstaltung(DetailView):
     """ spam-implementierung """
     model = models.Veranstaltung
@@ -72,7 +93,7 @@ class EintragenInEvent(LoginRequiredMixin, CreateView):
 
     Leitet zum login weiter, falls man nicht angemeldet ist.
     Öffnet Formular, in dem man die Art der Teilnahme wählen kann. """
-    login_url = '/login/'
+    login_url = settings.LOGIN_URL
     fields = ['art']
 
     def objekt_suchen(self):
@@ -131,6 +152,7 @@ class EintragenInVeranstaltung(EintragenInEvent):
 class EintragenInWettbewerb(EintragenInEvent):
     """ spam-implementierung """
     model = models.Erfolg
+    fields = ['art', 'zusatz']
     template_name = 'Wettbewerbe/formular_teilnahme_micheintragen.html'
 
     def objekt_suchen(self):
@@ -149,4 +171,4 @@ class TagDetail(DetailView):
             wettbewerb__in=self.get_object().wettbewerbe.all()
         ).order_by('zeit_erstellt')
         return context
-        
+

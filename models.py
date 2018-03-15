@@ -306,9 +306,22 @@ class Erfolg(Verknuepfung):
         on_delete=models.PROTECT,
         null=True,
     )
+    zusatz = models.CharField(
+        max_length=99,
+        blank=True,
+        default='',
+    ) # für Sonderpreise, Delegierungen und Spam
 
     ############ das braucht die parent-Klasse zum weiterverarbeiten
     verknuepft = ('wettbewerb', WettbewerbKonkret)
+
+    @property
+    def name(self):
+        if self.zusatz:
+            return "%s, %s" % (self.art.name, self.zusatz)
+        else:
+            return self.art.name
+
 
     @classmethod
     def neu_zu_objekt(cls, objekt):

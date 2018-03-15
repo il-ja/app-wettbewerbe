@@ -14,7 +14,7 @@
   <ul>
     {% for e in person.erfolge.all %}
       <li>
-      <a href={{ e.wettbewerb.get_absolute_url }}>{{ e.wettbewerb }}</a> - {{ e.art }}
+      <a href={{ e.wettbewerb.get_absolute_url }}>{{ e.wettbewerb.name }}</a> - {{ e.name }}
       </li>
     {% endfor %}
   </ul>
