@@ -50,4 +50,9 @@ urlpatterns = [
         views.EintragenInVeranstaltung.as_view(),
         name='mich_eintragen_veranstaltung',
     ),
+    # Detailseite Tag: GANZ UNTEN
+    url(r'^(?P<slug>[\w-]+)/$',
+        views.TagDetail.as_view(),
+        name='tag_detail',
+    ),
 ]

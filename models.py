@@ -117,6 +117,7 @@ class WettbewerbPrinzipiell(Grundklasse):
     class Meta:
         verbose_name = 'Generischer Wettbewerb'
         verbose_name_plural = 'Wettbewerbe Generisch'
+        unique_together = ('slug', 'slug_prefix')
 
 
 class WettbewerbKonkret(MinimalModel):
@@ -370,3 +371,7 @@ class Tag(Grundklasse):
         verbose_name = 'Tag'
         verbose_name_plural = 'Tags'
 
+    def get_absolute_url(self):
+        return reverse('Wettbewerbe:tag_detail', kwargs=dict(
+            slug=self.slug,
+        ))

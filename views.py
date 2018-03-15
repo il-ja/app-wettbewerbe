@@ -13,10 +13,14 @@ class IndexView(ListView):
     """ zeigt die Startseite an :) """
     def get_queryset(self):
         """ gibt dict mit Listen der Objekte zurück """
-        return {
-            'wettbewerbe': models.WettbewerbKonkret.objects.all(),
-            'veranstaltungen': models.Veranstaltung.objects.all(),
-        }
+        liste=[
+            ('konkreten wettbewerbe', models.WettbewerbKonkret.objects.all()),
+            ('veranstaltungen', models.Veranstaltung.objects.all()),
+        ]
+        for tagart in models.ArtTag.objects.all():
+            liste.append((tagart.name, models.Tag.objects.filter(art=tagart)))
+        return dict(liste)
+
 
     template_name = 'Wettbewerbe/index.html'
     context_object_name = 'listen'
@@ -135,3 +139,14 @@ class EintragenInWettbewerb(EintragenInEvent):
     def get_success_url(self):
         return self.objekt_suchen().get_absolute_url()
 
+class TagDetail(DetailView):
+    model = models.Tag
+    template_name = 'Wettbewerbe/tag_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['liste'] = models.WettbewerbKonkret.objects.filter(
+            wettbewerb__in=self.get_object().wettbewerbe.all()
+        ).order_by('zeit_erstellt')
+        return context
+        

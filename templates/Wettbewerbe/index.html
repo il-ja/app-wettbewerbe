@@ -3,7 +3,7 @@
 {% block content %}
   <h1> Startseite der Wettbewerbsdatenbank! </h1>
   {% for name, liste in listen.items %}
-  <p>Liste der <a href="{{ name }}">{{ name.title }}</a>:</p>
+  <p>Liste der {{ name.title }}:</p>
     <ul>
     {% for item in liste %}
       <li><a href={{ item.get_absolute_url }}>{{ item.name }}</a></li>
