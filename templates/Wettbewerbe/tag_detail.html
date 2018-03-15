@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>{{ object.name }} ({{ object.art }})</h2>
+  <ul>
+    {% for wettbewerbk in liste %}
+    <li><a href={{ wettbewerbk.get_absolute_url }}>{{ wettbewerbk.name }}</a></li>
+    {% endfor %}
+  </ul>
+{% endblock %}
