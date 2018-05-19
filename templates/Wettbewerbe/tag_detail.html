@@ -1,10 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h2>{{ object.name }} ({{ object.art }})</h2>
+  <h2>{{ tag.name }} ({{ tag.art }})</h2>
   <ul>
     {% for wettbewerbk in liste %}
-    <li><a href={{ wettbewerbk.get_absolute_url }}>{{ wettbewerbk.name }}</a></li>
+    	<li><a href={{ wettbewerbk.get_absolute_url }}>{{ wettbewerbk.name }}</a></li>
     {% endfor %}
   </ul>
+  {% if tag.rangliste_ausgeben %}
+  Folgende Personen sind in diesem {{ tag.art }} erfolgreich gewesen
+  <ul>
+  	{% for personk, punkte in tag.rangliste_ausgeben %}
+  		<li><a href={{ personk.get_absolute_url }}>{{ personk.name }}</a></li> {{ punkte }}
+  	{% endfor %}
+  </ul>
+  {% endif %}
 {% endblock %}

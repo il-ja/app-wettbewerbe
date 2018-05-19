@@ -164,6 +164,7 @@ class EintragenInWettbewerb(EintragenInEvent):
 class TagDetail(DetailView):
     model = models.Tag
     template_name = 'Wettbewerbe/tag_detail.html'
+    context_object_name = 'tag'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -171,4 +172,3 @@ class TagDetail(DetailView):
             wettbewerb__in=self.get_object().wettbewerbe.all()
         ).order_by('zeit_erstellt')
         return context
-
