@@ -98,6 +98,7 @@ class WettbewerbPrinzipiell(Grundklasse):
         blank=True,
         related_name='wettbewerbsarten',
     )
+    wichtung = models.PositiveSmallIntegerField(default=0)
 
     def get_absolute_url(self):
         return reverse('Wettbewerbe:ein_wettbewerb_generisch', kwargs=dict(
@@ -336,6 +337,8 @@ class Erfolg(Verknuepfung):
         verbose_name = 'Konkreter Erfolg'
         verbose_name_plural = 'Konkrete Erfolge'
 
+    def siegpunkte_ausgeben(self):
+        return self.wettbewerb.wettbewerb.wichtung * self.art.wichtung
 
 class ArtVeranstaltung(Grundklasse):
     """ Seminar, Olympiaderunde...; bestimmt, welche Teilnahmearten es gibt
@@ -357,6 +360,7 @@ class ArtTeilnahme(Grundklasse):
 
 class ArtErfolg(Grundklasse):
     """ Bezeichnung der Art: xy.Preis, Medaille, etc """
+    wichtung = models.PositiveSmallIntegerField(default=0)
     class Meta:
         verbose_name = 'Erfolgsart'
         verbose_name_plural = 'Arten von Erfolgen'
@@ -388,3 +392,19 @@ class Tag(Grundklasse):
         return reverse('Wettbewerbe:tag_detail', kwargs=dict(
             slug=self.slug,
         ))
+
+    def rangliste_ausgeben(self):
+        rangliste = {}
+        for person in Person.objects.all():
+            rangliste[person.pk] = 0
+        for erfolg in Erfolg.objects.exclude(
+                person=None).filter(
+                wettbewerb__wettbewerb__tags=self):
+            rangliste[erfolg.person.pk] += erfolg.siegpunkte_ausgeben()
+        pks = [pk for pk in rangliste if rangliste[pk]]
+        personen = Person.objects.filter(pk__in=pks)
+        rangliste = sorted(
+            [(person, rangliste[person.pk]) for person in personen],
+            key=lambda item: -item[1]
+        ) 
+        return rangliste
