@@ -163,7 +163,7 @@ class EintragenInWettbewerb(EintragenInEvent):
 
 class TagDetail(DetailView):
     model = models.Tag
-    template_name = 'Wettbewerbe/tag_detail.html'
+    template_name = 'Wettbewerbe/ein_tag.html'
     context_object_name = 'tag'
 
     def get_context_data(self, **kwargs):
