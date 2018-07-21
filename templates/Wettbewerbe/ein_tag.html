@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h2>{{ object.name }} ({{ object.art }})</h2>
+  <h2>{{ tag.name }} ({{ tag.art }})</h2>
   <ul>
     {% for wettbewerbk in liste %}
     <li><a href={{ wettbewerbk.get_absolute_url }}>{{ wettbewerbk.name }}</a></li>
     {% endfor %}
   </ul>
+  {% if tag.kommentarliste %}{% include 'Kommentare/kommentarliste.html' with liste=tag.kommentarliste %}{% endif %}
 {% endblock %}

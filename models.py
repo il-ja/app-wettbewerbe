@@ -16,6 +16,12 @@ from Kommentare.models import KommentareMetaklasse
  - ArtTeilnahme, ArtErfolg, ArtVeranstaltung, ArtWettbewerb
 """
 
+def admin_url(objekt):
+    return '/admin/Wettbewerbe/{model}/{pk}/change'.format(
+        model=objekt.__class__.__name__.lower(),
+        pk=objekt.pk,
+    )
+
 class Person(MinimalModel):
     """ DB-Eintrag für eine Person
 
@@ -364,6 +370,11 @@ class ArtErfolg(Grundklasse):
 
 class ArtTag(Grundklasse):
     """ Art: Wettbewerb, Bundesland, Klassenstufe, ...? """
+    plural = models.CharField(
+        max_length=99,
+        blank=True,
+        default='',
+    )
     class Meta:
         verbose_name = 'Art des Tags'
         verbose_name_plural = 'Arten von Tags'
@@ -386,7 +397,7 @@ class Tag(Grundklasse, metaclass=KommentareMetaklasse):
         verbose_name_plural = 'Tags'
 
     def get_absolute_url(self):
-        return reverse('Wettbewerbe:tag_detail', kwargs=dict(
+        return reverse('Wettbewerbe:ein_tag', kwargs=dict(
             slug=self.slug,
         ))
 

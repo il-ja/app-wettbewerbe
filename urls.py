@@ -52,7 +52,7 @@ urlpatterns = [
     ),
     # Detailseite Tag: GANZ UNTEN
     url(r'^(?P<slug>[\w-]+)/$',
-        views.TagDetail.as_view(),
-        name='tag_detail',
+        views.EinTag.as_view(),
+        name='ein_tag',
     ),
 ]
