@@ -19,7 +19,7 @@ class IndexView(ListView):
             ('veranstaltungen', models.Veranstaltung.objects.all()),
         ]
         for tagart in models.ArtTag.objects.all():
-            liste.append((tagart.name, models.Tag.objects.filter(art=tagart)))
+            liste.append((tagart.plural, models.Tag.objects.filter(art=tagart)))
         return dict(liste)
 
 
@@ -161,7 +161,7 @@ class EintragenInWettbewerb(EintragenInEvent):
     def get_success_url(self):
         return self.objekt_suchen().get_absolute_url()
 
-class TagDetail(DetailView):
+class EinTag(DetailView):
     model = models.Tag
     template_name = 'Wettbewerbe/ein_tag.html'
     context_object_name = 'tag'

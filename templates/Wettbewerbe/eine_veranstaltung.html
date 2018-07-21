@@ -45,4 +45,5 @@
     {% endfor %}
   </ul>
   {% endif %}
+  {% if veranstaltung.kommentarliste %}{% include 'Kommentare/kommentarliste.html' with liste=veranstaltung.kommentarliste %}{% endif %}
 {% endblock %}

@@ -5,14 +5,15 @@ from django.contrib.auth import get_user_model
 
 from django.db import models
 from Grundgeruest.models import Grundklasse, MinimalModel
+from Kommentare.models import KommentareMetaklasse
 
 
 """ Es werden folgende models definiert:
  - Person
  - Veranstaltung
- - Wettbewerb
+ - Wettbewerb - Konkret und Prinzipiell - und Tag
  - Teilnahme, Erfolg
- - ArtTeilnahme, ArtErfolg, ArtVeranstaltung, ArtWettbewerb
+ - ArtTeilnahme, ArtErfolg, ArtVeranstaltung, ArtWettbewerb, ArtTag
 """
 
 class Person(MinimalModel):
@@ -56,7 +57,7 @@ class Person(MinimalModel):
         verbose_name = 'Person'
 
 
-class Veranstaltung(Grundklasse):
+class Veranstaltung(Grundklasse, metaclass=KommentareMetaklasse):
     """ Eine konkrete Veranstaltung an einem Ort """
     art = models.ForeignKey(
         'ArtVeranstaltung',
@@ -74,7 +75,7 @@ class Veranstaltung(Grundklasse):
         ))
 
 
-class WettbewerbPrinzipiell(Grundklasse):
+class WettbewerbPrinzipiell(Grundklasse, metaclass=KommentareMetaklasse):
     """ Ein generisches Wettbewerbsobjekt, zeitlos
 
     Eine Instanz im Netz der Wettbewerbe, z.B. LaMO Sachsen 9.Klasse
@@ -121,7 +122,7 @@ class WettbewerbPrinzipiell(Grundklasse):
         unique_together = ('slug', 'slug_prefix')
 
 
-class WettbewerbKonkret(MinimalModel):
+class WettbewerbKonkret(MinimalModel, metaclass=KommentareMetaklasse):
     """ Ein konkretes Wettbewerbsobjekt, in das man sich eintragen kann
 
     Gehört zu einem WettbewerbGenerisch
@@ -367,11 +368,16 @@ class ArtErfolg(Grundklasse):
 
 class ArtTag(Grundklasse):
     """ Art: Wettbewerb, Bundesland, Klassenstufe, ...? """
+    plural = models.CharField(
+        max_length=99,
+        blank=True,
+        default='',
+    )
     class Meta:
         verbose_name = 'Art des Tags'
         verbose_name_plural = 'Arten von Tags'
 
-class Tag(Grundklasse):
+class Tag(Grundklasse, metaclass=KommentareMetaklasse):
     """ Tags von Wettbewerben: Matheolympiade, Sachsen, etc. """
     art = models.ForeignKey(
         ArtTag,
@@ -389,7 +395,7 @@ class Tag(Grundklasse):
         verbose_name_plural = 'Tags'
 
     def get_absolute_url(self):
-        return reverse('Wettbewerbe:tag_detail', kwargs=dict(
+        return reverse('Wettbewerbe:ein_tag', kwargs=dict(
             slug=self.slug,
         ))
 

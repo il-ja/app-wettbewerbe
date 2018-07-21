@@ -57,4 +57,5 @@
       {% endfor %}
     </ul>
   {% endif %}
+  {% if wettbewerb.kommentarliste %}{% include 'Kommentare/kommentarliste.html' with liste=wettbewerb.kommentarliste %}{% endif %}
 {% endblock %}
