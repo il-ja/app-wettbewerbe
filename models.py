@@ -67,6 +67,12 @@ class Veranstaltung(Grundklasse, metaclass=KommentareMetaklasse):
     beschreibung = models.TextField(default='', blank=True)
     datum_anfang = models.DateField(null=True, blank=True)
     datum_ende = models.DateField(null=True, blank=True)
+    tags = models.ManyToManyField(
+        'Tag',
+        blank=True,
+        related_name='veranstaltungen',
+    )
+
     class Meta: verbose_name_plural = 'Veranstaltungen'
 
     def get_absolute_url(self):
@@ -98,6 +104,11 @@ class WettbewerbPrinzipiell(Grundklasse, metaclass=KommentareMetaklasse):
         'ArtErfolg',
         blank=True,
         related_name='wettbewerbsarten',
+    )
+    tags = models.ManyToManyField(
+        'Tag',
+        blank=True,
+        related_name='wettbewerbe',
     )
     wichtung = models.PositiveSmallIntegerField(default=0)
 
@@ -383,11 +394,6 @@ class Tag(Grundklasse, metaclass=KommentareMetaklasse):
         ArtTag,
         null=True,
         on_delete=models.PROTECT,
-        related_name='tags',
-    )
-    wettbewerbe = models.ManyToManyField(
-        WettbewerbPrinzipiell,
-        blank=True,
         related_name='tags',
     )
     class Meta:

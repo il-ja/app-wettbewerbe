@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% load seitentags %}
 
 {% block content %}
-  <h2>{{ tag.name }} ({{ tag.art }})</h2>
+  <h2>{% listeneintrag tag request %} ({{ tag.art }})</h2>
   <ul>
     {% for wettbewerbk in liste %}
-    <li><a href={{ wettbewerbk.get_absolute_url }}>{{ wettbewerbk.name }}</a></li>
+    <li>{% listeneintrag wettbewerbk request %}</li>
     {% endfor %}
   </ul>
   {% if tag.kommentarliste %}{% include 'Kommentare/kommentarliste.html' with liste=tag.kommentarliste %}{% endif %}

@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load seitentags %}
 
 {% block content %}
-  <h2>Wettbewerb {{ wettbewerb.name }}</h2>
+  <h2>Wettbewerb {% listeneintrag wettbewerb request %}</h2>
   <p>{{ wettbewerb.beschreibung }}</p>
   <p>Es sind folgende {{ wettbewerb.erfolge.count }} Erfolge bei diesem Wettbewerb erzielt worden:</p>
   <ul>
@@ -13,9 +14,10 @@
           {{ e.nur_name }}
         {% endif %}
          - {{ e.name }}
+         {% listeneintrag e request True %}
       </li>
     {% endfor %}
-    {% if request.user.username == 'admin' %}
+    {% if request.user.is_staff %}
       <li><a style="color: gray;" href="person_eintragen/">[neuen Erfolg eintragen]</a></li>
     {% elif 'spam' %}
       <li><a style="color: gray;" href="mich_eintragen/">[meinen Erfolg eintragen]</a></li>
@@ -24,7 +26,7 @@
 
   {# Links zur Veranstaltung und anderen Wettbewerben der Veranstaltung #}
   {% if wettbewerb.veranstaltung %}
-  Der Wettbewerb hat im Rahmen der Veranstaltung <a href={{ wettbewerb.veranstaltung.get_absolute_url }}>{{ wettbewerb.veranstaltung.name }}</a> stattgefunden.
+  Der Wettbewerb hat im Rahmen der Veranstaltung {% listeneintrag wettbewerb.veranstaltung request %} stattgefunden.
     {% ifnotequal wettbewerb.veranstaltung.wettbewerbe.count 1 %}
     Weitere Wettbewerbe auf dieser Veranstaltung:
     <ul>

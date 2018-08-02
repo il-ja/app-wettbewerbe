@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load seitentags %}
 
 {% block content %}
   <h1> Startseite der Wettbewerbsdatenbank! </h1>
@@ -6,7 +7,9 @@
   <p>Liste der {{ name.title }}:</p>
     <ul>
     {% for item in liste %}
-      <li><a href={{ item.get_absolute_url }}>{{ item.name }}</a></li>
+      <li>
+        {% listeneintrag item request %}
+      </li>
     {% endfor %}
     </ul>
   {% endfor %}

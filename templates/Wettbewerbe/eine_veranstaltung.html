@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load seitentags %}
 
 {% block content %}
 <h2>Veranstaltung {{ veranstaltung.name }} ({{ veranstaltung.art }})</h2>
@@ -13,6 +14,7 @@
           {{ t.nur_name }}
         {% endif %}
          - {{ t.art }}
+         {% listeneintrag t request True %}
       </li>
     {% endfor %}
     {% if request.user.username == 'admin' %}
@@ -25,7 +27,8 @@
   <p>Es sind folgende Wettbewerbe bei dieser Veranstaltung ausgetragen worden</p>
   <ul>
     {% for w in veranstaltung.wettbewerbe.all %}
-      <li><a href={{ w.get_absolute_url }}>{{ w.name }}</a>
+      <li>
+      {% listeneintrag w request %}
       {% if w.erfolge.all %}
         <br />Folgende Erfolge wurden dabei erreicht
         <ul>

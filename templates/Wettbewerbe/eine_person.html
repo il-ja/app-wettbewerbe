@@ -1,12 +1,14 @@
 {% extends "base.html" %}
+{% load seitentags %}
 
 {% block content %}
-  <h2>Person {{ person.name }}</h2>
+  <h2>Person {% listeneintrag person request %}</h2>
   <p>Es sind folgende {{ person.teilnahmen.count }} Teilnahmen an Veranstaltungen bekannt:</p>
   <ul>
     {% for t in person.teilnahmen.all %}
       <li>
-        <a href="{% url 'Wettbewerbe:eine_veranstaltung' t.veranstaltung.slug %}">{{ t.veranstaltung }}</a> - {{ t.art }}
+        {% listeneintrag t.veranstaltung request %} - {{ t.art }}
+        {% listeneintrag t request True %}
       </li>
     {% endfor %}
   </ul>
@@ -14,7 +16,8 @@
   <ul>
     {% for e in person.erfolge.all %}
       <li>
-      <a href={{ e.wettbewerb.get_absolute_url }}>{{ e.wettbewerb.name }}</a> - {{ e.name }}
+        {% listeneintrag e.wettbewerb request %} - {{ e.art }}
+        {% listeneintrag e request True %}
       </li>
     {% endfor %}
   </ul>
