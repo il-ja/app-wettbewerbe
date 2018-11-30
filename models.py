@@ -4,7 +4,8 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
 from django.db import models
-from Grundgeruest.models import Grundklasse, MinimalModel
+from django_extensions.db.models import TimeStampedModel
+from Grundgeruest.models import Grundklasse
 from Kommentare.models import KommentareMetaklasse
 
 
@@ -16,10 +17,10 @@ from Kommentare.models import KommentareMetaklasse
  - ArtTeilnahme, ArtErfolg, ArtVeranstaltung, ArtWettbewerb, ArtTag
 """
 
-class Person(MinimalModel):
+class Person(TimeStampedModel):
     """ DB-Eintrag für eine Person
 
-    erbt nur von MinimalModel, da Link zu einem Nutzer obligatorisch ist,
+    erbt nur von TimeStampedModel, da Link zu einem Nutzer obligatorisch ist,
     und damit ein name-Feld redundant wäre.
 
     TODO: bei delete vorher was machen, u.a. Teilnahmen auf string setzen
@@ -133,7 +134,7 @@ class WettbewerbPrinzipiell(Grundklasse, metaclass=KommentareMetaklasse):
         unique_together = ('slug', 'slug_prefix')
 
 
-class WettbewerbKonkret(MinimalModel, metaclass=KommentareMetaklasse):
+class WettbewerbKonkret(TimeStampedModel, metaclass=KommentareMetaklasse):
     """ Ein konkretes Wettbewerbsobjekt, in das man sich eintragen kann
 
     Gehört zu einem WettbewerbGenerisch
@@ -192,7 +193,7 @@ class WettbewerbKonkret(MinimalModel, metaclass=KommentareMetaklasse):
         verbose_name_plural = 'Wettbewerbe Konkret'
 
 
-class Verknuepfung(MinimalModel):
+class Verknuepfung(TimeStampedModel):
     nur_name = models.CharField( # falls Person nicht eingetragen, nur str
         max_length=99,
         blank=True,
