@@ -170,5 +170,5 @@ class EinTag(DetailView):
         context = super().get_context_data(**kwargs)
         context['liste'] = models.WettbewerbKonkret.objects.filter(
             wettbewerb__in=self.get_object().wettbewerbe.all()
-        ).order_by('zeit_erstellt')
+        ).order_by('created')
         return context

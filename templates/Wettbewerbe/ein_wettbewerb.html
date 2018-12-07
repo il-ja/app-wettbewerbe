@@ -3,7 +3,7 @@
 
 {% block content %}
   <h2>Wettbewerb {% listeneintrag wettbewerb request %}</h2>
-  <p>{{ wettbewerb.beschreibung }}</p>
+  <p>{{ wettbewerb.description }}</p>
   <p>Es sind folgende {{ wettbewerb.erfolge.count }} Erfolge bei diesem Wettbewerb erzielt worden:</p>
   <ul>
     {% for e in wettbewerb.erfolge.all %}
@@ -32,7 +32,7 @@
     <ul>
       {% for w in wettbewerb.veranstaltung.wettbewerbe.all %}
         {% ifnotequal w wettbewerb %}
-          <li><a href={{ w.get_absolute_url }}>{{ w.name }}</a></li>
+          <li><{% listeneintrag w request %}</li>
         {% endifnotequal %}
       {% endfor %}
     </ul>
@@ -41,13 +41,13 @@
 
   {# Link zur nächsten/vorherigen Runde #}
   {% if fortsetzung %}
-    zur nächsten Runde: <a href={{ fortsetzung.get_absolute_url }}>{{ fortsetzung.name }}</a>
+    zur nächsten Runde: {% listeneintrag fortsetzung request %}
   {% endif %}
   {% if vorherige %}
     zu Wettbewerben der vorherigen Runde:
     {% for w in vorherige %}
       <ul>
-        <li><a href={{ w.get_absolute_url }}>{{ w.name }}</a></li>
+        <li>{% listeneintrag w request %}</li>
       </ul>
     {% endfor %}
   {% endif %}
@@ -55,7 +55,7 @@
     gleichzeitig finden andere Wettbewerbe zu dieser Wettbewerbsrunde statt:
     <ul>
       {% for w in nachbarn %}
-        <li><a href={{ w.get_absolute_url }}>{{ w.name }}</a></li>
+        <li>{% listeneintrag w request %}</li>
       {% endfor %}
     </ul>
   {% endif %}

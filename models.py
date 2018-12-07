@@ -4,7 +4,8 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 
 from django.db import models
-from Grundgeruest.models import Grundklasse, MinimalModel
+from django_extensions.db.models import TimeStampedModel
+from Grundgeruest.models import Grundklasse
 from Kommentare.models import KommentareMetaklasse
 
 
@@ -13,13 +14,13 @@ from Kommentare.models import KommentareMetaklasse
  - Veranstaltung
  - Wettbewerb - Konkret und Prinzipiell - und Tag
  - Teilnahme, Erfolg
- - ArtTeilnahme, ArtErfolg, ArtVeranstaltung, ArtWettbewerb, ArtTag
+ - ArtTeilnahme, ArtErfolg, ArtVeranstaltung, ArtTag
 """
 
-class Person(MinimalModel):
+class Person(TimeStampedModel):
     """ DB-Eintrag für eine Person
 
-    erbt nur von MinimalModel, da Link zu einem Nutzer obligatorisch ist,
+    erbt nur von TimeStampedModel, da Link zu einem Nutzer obligatorisch ist,
     und damit ein name-Feld redundant wäre.
 
     TODO: bei delete vorher was machen, u.a. Teilnahmen auf string setzen
@@ -64,7 +65,6 @@ class Veranstaltung(Grundklasse, metaclass=KommentareMetaklasse):
         null=True,
         on_delete=models.PROTECT,
     )
-    beschreibung = models.TextField(default='', blank=True)
     datum_anfang = models.DateField(null=True, blank=True)
     datum_ende = models.DateField(null=True, blank=True)
     tags = models.ManyToManyField(
@@ -133,12 +133,12 @@ class WettbewerbPrinzipiell(Grundklasse, metaclass=KommentareMetaklasse):
         unique_together = ('slug', 'slug_prefix')
 
 
-class WettbewerbKonkret(MinimalModel, metaclass=KommentareMetaklasse):
+class WettbewerbKonkret(TimeStampedModel, metaclass=KommentareMetaklasse):
     """ Ein konkretes Wettbewerbsobjekt, in das man sich eintragen kann
 
     Gehört zu einem WettbewerbGenerisch
     """
-    beschreibung = models.TextField(default='', blank=True)
+    description = models.TextField(default='', blank=True)
     jahrgang = models.PositiveSmallIntegerField()
     datum = models.CharField(
         max_length=255,
@@ -159,17 +159,17 @@ class WettbewerbKonkret(MinimalModel, metaclass=KommentareMetaklasse):
     )
 
     @property
-    def name(self):
+    def title(self):
         if self.jahrgang < 1000:
-            return "%s. %s" % (self.jahrgang, self.wettbewerb.name)
+            return "%s. %s" % (self.jahrgang, self.wettbewerb.title)
         else:
-            return "%s %s" % (self.wettbewerb.name, self.jahrgang)
+            return "%s %s" % (self.wettbewerb.title, self.jahrgang)
 
     def __str__(self):
-        return "Jahrgang {nr} von {wettbewerb}, geändert {datum}".format(
+        return "Jahrgang {nr} von {wettbewerb}, zuletzt geändert {datum}".format(
             nr=self.jahrgang,
-            wettbewerb=self.wettbewerb.name,
-            datum=self.zeit_geaendert,
+            wettbewerb=self.wettbewerb.title,
+            datum=self.modified,
         )
 
     def get_absolute_url(self):
@@ -192,7 +192,7 @@ class WettbewerbKonkret(MinimalModel, metaclass=KommentareMetaklasse):
         verbose_name_plural = 'Wettbewerbe Konkret'
 
 
-class Verknuepfung(MinimalModel):
+class Verknuepfung(TimeStampedModel):
     nur_name = models.CharField( # falls Person nicht eingetragen, nur str
         max_length=99,
         blank=True,
