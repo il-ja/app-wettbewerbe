@@ -4,7 +4,7 @@
 {% block content %}
   <h2>Wettbewerb {% listeneintrag wettbewerb request %}</h2>
   <p>{{ wettbewerb.description }}</p>
-  <p>Es sind folgende {{ wettbewerb.erfolge.count }} Erfolge bei diesem Wettbewerb erzielt worden:</p>
+  <p>Es {% null_ein_viele wettbewerb.erfolge.count "ist kein Erfolg" "ist nur ein Erfolg" "sind {} Erfolge" %} bei diesem Wettbewerb erzielt worden:</p>
   <ul>
     {% for e in wettbewerb.erfolge.all %}
       <li>
@@ -17,22 +17,18 @@
          {% listeneintrag e request True %}
       </li>
     {% endfor %}
-    {% if request.user.is_staff %}
-      <li><a style="color: gray;" href="person_eintragen/">[neuen Erfolg eintragen]</a></li>
-    {% elif 'spam' %}
-      <li><a style="color: gray;" href="mich_eintragen/">[meinen Erfolg eintragen]</a></li>
-    {% endif %}
+    <li><a style="color: gray;" href="mich_eintragen/">[meinen Erfolg eintragen]</a></li>
   </ul>
 
   {# Links zur Veranstaltung und anderen Wettbewerben der Veranstaltung #}
   {% if wettbewerb.veranstaltung %}
   Der Wettbewerb hat im Rahmen der Veranstaltung {% listeneintrag wettbewerb.veranstaltung request %} stattgefunden.
     {% ifnotequal wettbewerb.veranstaltung.wettbewerbe.count 1 %}
-    Weitere Wettbewerbe auf dieser Veranstaltung:
+    <p>Weitere Wettbewerbe auf dieser Veranstaltung:</p>
     <ul>
       {% for w in wettbewerb.veranstaltung.wettbewerbe.all %}
         {% ifnotequal w wettbewerb %}
-          <li><{% listeneintrag w request %}</li>
+          <li>{% listeneintrag w request %}</li>
         {% endifnotequal %}
       {% endfor %}
     </ul>
@@ -41,7 +37,7 @@
 
   {# Link zur nächsten/vorherigen Runde #}
   {% if fortsetzung %}
-    zur nächsten Runde: {% listeneintrag fortsetzung request %}
+    <p>Zur nächsten Runde: {% listeneintrag fortsetzung request %}</p>
   {% endif %}
   {% if vorherige %}
     zu Wettbewerben der vorherigen Runde:
@@ -52,7 +48,7 @@
     {% endfor %}
   {% endif %}
   {% if nachbarn %}
-    gleichzeitig finden andere Wettbewerbe zu dieser Wettbewerbsrunde statt:
+    <p>Gleichzeitig finden andere Wettbewerbe zu dieser Wettbewerbsrunde statt:</p>
     <ul>
       {% for w in nachbarn %}
         <li>{% listeneintrag w request %}</li>

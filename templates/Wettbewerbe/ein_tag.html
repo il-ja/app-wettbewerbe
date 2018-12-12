@@ -4,8 +4,13 @@
 {% block content %}
   <h2>{% listeneintrag tag request %} ({{ tag.art }})</h2>
   <ul>
-    {% for wettbewerbk in liste %}
+    {% for wettbewerbk in wettbewerbe %}
     <li>{% listeneintrag wettbewerbk request %}</li>
+    {% endfor %}
+  </ul>
+  <ul>
+    {% for veranstaltung in veranstaltungen %}
+    <li>{% listeneintrag veranstaltung request %}</li>
     {% endfor %}
   </ul>
   {% if tag.kommentarliste %}{% include 'Kommentare/kommentarliste.html' with liste=tag.kommentarliste %}{% endif %}

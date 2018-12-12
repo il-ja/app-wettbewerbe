@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<p> {{ form.instance.person.name }}, Sie nehmen an {{ form.instance.veranstaltung }} teil? </br>Bitte wählen Sie die Art der Teilnahme!:</p>
+<p> {{ form.instance.person.name }}, Sie nehmen an {{ form.instance.veranstaltung }}{{ form.instance.wettbewerb.title }} teil? </br>Bitte wählen Sie die Art der Teilnahme!:</p>
   <form method="post" action="">
     {% csrf_token %}
     {{ form.as_p }}

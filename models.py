@@ -49,9 +49,17 @@ class Person(TimeStampedModel):
 
     @property
     def name(self):
-        return self.nutzer.get_full_name()
+        return "%s %s" % (self.nutzer.profil.vorname, self.nutzer.profil.nachname)
+    @property
+    def title(self):
+        return self.name
     def __str__(self):
         return 'Person {}'.format(self.name)
+
+    def get_absolute_url(self):
+        return reverse('Wettbewerbe:eine_person', kwargs=dict(
+            pk=self.pk,
+        ))
 
     class Meta:
         verbose_name_plural = 'Personen'
@@ -331,9 +339,9 @@ class Erfolg(Verknuepfung):
     @property
     def name(self):
         if self.zusatz:
-            return "%s, %s" % (self.art.name, self.zusatz)
+            return "%s, %s" % (self.art.title, self.zusatz)
         else:
-            return self.art.name
+            return self.art.title
 
 
     @classmethod
@@ -396,6 +404,7 @@ class Tag(Grundklasse, metaclass=KommentareMetaklasse):
         on_delete=models.PROTECT,
         related_name='tags',
     )
+
     class Meta:
         verbose_name = 'Tag'
         verbose_name_plural = 'Tags'
@@ -404,6 +413,9 @@ class Tag(Grundklasse, metaclass=KommentareMetaklasse):
         return reverse('Wettbewerbe:ein_tag', kwargs=dict(
             slug=self.slug,
         ))
+
+    def __str__(self):
+        return '%s: %s' % (self.art, self.title)
 
     def rangliste_ausgeben(self):
         rangliste = {}
