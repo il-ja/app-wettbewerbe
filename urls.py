@@ -5,7 +5,7 @@ app_name = 'Wettbewerbe'
 
 # Hilfspatterns gruppiert
 wettbewerbe_urls = [
-    url(r'^(?P<slug_prefix>[\w-]+)/(?P<jahrgang>[1-9]+)/(?P<slug>[\w-]+)/$',
+    url(r'^(?P<slug_prefix>[\w-]+)/(?P<jahrgang>[0-9]+)/(?P<slug>[\w-]+)/$',
         views.EinWettbewerbKonkret.as_view(),
         name='ein_wettbewerb_konkret',
     ),
@@ -13,7 +13,7 @@ wettbewerbe_urls = [
         views.EinWettbewerb.as_view(),
         name='ein_wettbewerb_generisch',
     ),
-    url(r'^(?P<slug_prefix>[\w-]+)/(?P<jahrgang>[1-9]+)/(?P<slug>[\w-]+)/mich_eintragen/$',
+    url(r'^(?P<slug_prefix>[\w-]+)/(?P<jahrgang>[0-9]+)/(?P<slug>[\w-]+)/mich_eintragen/$',
         views.EintragenInWettbewerb.as_view(),
         name='mich_eintragen_wettbewerb',
     ),

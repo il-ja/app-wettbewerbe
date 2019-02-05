@@ -3,6 +3,7 @@
 
 {% block content %}
 <h2>{% listeneintrag veranstaltung request %}</h2>
+  <p>{{ veranstaltung.datum_anfang }} - {{ veranstaltung.datum_ende }} </p>
   <p>{{ veranstaltung.beschreibung }}</p>
   <p>Es {% null_ein_viele veranstaltung.teilnahmen.count %} an der Veranstaltung bekannt:</p>
   <ul>
