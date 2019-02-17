@@ -23,6 +23,7 @@ wettbewerbe_urls = [
 urlpatterns = [
     # Übersichtsseiten:
     url(r'^$', views.IndexView.as_view(), name='index'),
+    url(r'^listen/$', views.ListenView.as_view(), name='listen'),
     url(r'^wettbewerbe/$',
         views.ListeWettbewerbe.as_view(),
         name='liste_wettbewerbe',

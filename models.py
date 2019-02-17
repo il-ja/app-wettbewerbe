@@ -8,6 +8,8 @@ from django_extensions.db.models import TimeStampedModel
 from Grundgeruest.models import Grundklasse
 from Kommentare.models import KommentareMetaklasse
 
+from datetime import datetime
+
 
 """ Es werden folgende models definiert:
  - Person
@@ -80,6 +82,29 @@ class Veranstaltung(Grundklasse, metaclass=KommentareMetaklasse):
         blank=True,
         related_name='veranstaltungen',
     )
+
+    @classmethod
+    def get_letzte(cls):
+        """ gibt Veranstaltungen zurück, die noch nicht angefangen haben """
+        return cls.objects.filter(
+            datum_ende__lt=datetime.now()
+        ).order_by('-datum_ende')
+
+    @classmethod
+    def get_aktuell(cls):
+        """ gibt Veranstaltungen zurück, die noch nicht angefangen haben """
+        return cls.objects.filter(
+            datum_anfang__lt=datetime.now()
+        ).filter(
+            datum_ende__gt=datetime.now()
+        ).order_by('datum_ende')
+
+    @classmethod
+    def get_kommende(cls):
+        """ gibt Veranstaltungen zurück, die noch nicht angefangen haben """
+        return cls.objects.filter(
+            datum_anfang__gt=datetime.now()
+        ).order_by('datum_anfang')
 
     class Meta: verbose_name_plural = 'Veranstaltungen'
 
@@ -242,6 +267,9 @@ class Verknuepfung(TimeStampedModel):
         name = self.person or self.nur_name or '?'
         return '{} - {}'.format(name, self.objekt)
 
+    @property
+    def title(self):
+        return "%s -> %s" % (self.person.name or self.nur_name, getattr(self, self.verknuepft[0]).title)
 
     def save(self, *args, **kwargs):
         """ Führt vor dem save() Validierungen durch """

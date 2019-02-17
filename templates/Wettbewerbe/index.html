@@ -1,21 +1,33 @@
 {% extends "base.html" %}
 {% load seitentags %}
 
-{% block content %}
-  <h1> Startseite der Wettbewerbsdatenbank! </h1>
-  {% for name, liste in listen.items %}
-  <p>Liste der {{ name.title }}:</p>
-    <ul>
-    {% for item in liste %}
-      <li>
-        {% listeneintrag item request %}
-      </li>
-    {% endfor %}
-    </ul>
-  {% endfor %}
-  <p>
-    tertiam non olet: {% lorem 46 w %}!
-    <br> {% lorem 81 w random %}.
-  </p>
+{% block zusatz_css %}
+<style>
+  article {
+    display: flex;
+    display: -webkit-flex;
+    -webkit-flex-flow: row wrap;
+    flex-flow: row wrap;
+  }
+  fieldset.kategorie {
+    display: flex;
+    display: -webkit-flex;
+    border-radius: 6pt;
+    margin: 7px 9px 4px 4px;
+    -webkit-flex-flow: column wrap;
+    flex-flow: column wrap;
+    flex: 1 36ex;
+  }
+</style>
+{% endblock %}
 
+{% block content %}
+  {% for name, liste in kategorien %}
+    <fieldset class="kategorie">
+      <legend>{{ name }}</legend>
+        {% for objekt in liste %}
+        <div>{% listeneintrag objekt request %}<div>
+        {% endfor %}
+    </fieldset>
+  {% endfor %}
 {% endblock %}

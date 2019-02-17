@@ -13,6 +13,25 @@ import ipdb
 class IndexView(ListView):
     """ zeigt die Startseite an :) """
     def get_queryset(self):
+        """ gibt tupel (Überschrift, Liste) zurück """
+        return [
+            (name, liste)
+            for name, liste in [
+                ('Die nächsten Veranstaltungen', models.Veranstaltung.get_kommende()[:4]),
+                ('Laufende Veranstaltungen', models.Veranstaltung.get_aktuell()[:4]),
+                ('Die letzten Veranstaltungen', models.Veranstaltung.get_letzte()[:4]),
+                ('Zuletzt eingetragene Teilnahmen', models.Teilnahme.objects.order_by('-modified')[:4]),
+                ('Zuletzt eingetragene Erfolge', models.Erfolg.objects.order_by('-modified')[:4]),
+            ]
+            if liste
+        ]
+
+    template_name = 'Wettbewerbe/index.html'
+    context_object_name = 'kategorien'
+
+class ListenView(ListView):
+    """ zeigt die Startseite an :) """
+    def get_queryset(self):
         """ gibt dict mit Listen der Objekte zurück """
         liste = [
             ('konkreten wettbewerbe', models.WettbewerbKonkret.objects.all()),
@@ -23,7 +42,7 @@ class IndexView(ListView):
         return dict(liste)
 
 
-    template_name = 'Wettbewerbe/index.html'
+    template_name = 'Wettbewerbe/listen.html'
     context_object_name = 'listen'
 
 class ListeWettbewerbe(ListView):

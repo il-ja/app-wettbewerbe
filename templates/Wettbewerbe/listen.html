@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load seitentags %}
+
+{% block content %}
+  <h1> Übersicht diverser Listen von Objekten </h1>
+  {% for name, liste in listen.items %}
+  <p>Liste der {{ name.title }}:</p>
+    <ul>
+    {% for item in liste %}
+      <li>
+        {% listeneintrag item request %}
+      </li>
+    {% endfor %}
+    </ul>
+  {% endfor %}
+  <p>
+    tertiam non olet: {% lorem 46 w %}!
+    <br> {% lorem 81 w random %}.
+  </p>
+
+{% endblock %}
