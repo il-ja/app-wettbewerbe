@@ -3,6 +3,8 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseRedirect
+from braces.views import MessageMixin
 
 from . import models
 
@@ -17,11 +19,14 @@ class IndexView(ListView):
         return [
             (name, liste)
             for name, liste in [
-                ('Die nächsten Veranstaltungen', models.Veranstaltung.get_kommende()[:4]),
-                ('Laufende Veranstaltungen', models.Veranstaltung.get_aktuell()[:4]),
-                ('Die letzten Veranstaltungen', models.Veranstaltung.get_letzte()[:4]),
-                ('Zuletzt eingetragene Teilnahmen', models.Teilnahme.objects.order_by('-modified')[:4]),
+                ('Die nächsten Veranstaltungen', models.Veranstaltung.get_kommende()[:6]),
+                (' -- featured -- ', models.WettbewerbKonkret.objects.filter(pk=2)),
+                ('Laufende Veranstaltungen', models.Veranstaltung.get_aktuell()[:3]),
+                ('Die letzten Veranstaltungen', models.Veranstaltung.get_letzte()[:7]),
+                ('Zuletzt eingetragene Teilnahmen', models.Teilnahme.objects.order_by('-modified')[:8]),
                 ('Zuletzt eingetragene Erfolge', models.Erfolg.objects.order_by('-modified')[:4]),
+                ('Zuletzt eingetragene Veranstaltungen', models.Veranstaltung.objects.order_by('-modified')[:7]),
+                ('Zuletzt eingetragene Wettbewerbe', models.WettbewerbKonkret.objects.order_by('-modified')[:7]),
             ]
             if liste
         ]
@@ -107,7 +112,7 @@ class EinePerson(DetailView):
     template_name = 'Wettbewerbe/eine_person.html'
     context_object_name = 'person'
 
-class EintragenInEvent(LoginRequiredMixin, CreateView):
+class EintragenInEvent(LoginRequiredMixin, CreateView, MessageMixin):
     """ zum Eintragen des Nutzers in Veranstaltung oder Wettbewerb
 
     Leitet zum login weiter, falls man nicht angemeldet ist.
@@ -123,6 +128,12 @@ class EintragenInEvent(LoginRequiredMixin, CreateView):
             return self.handle_no_permission() # aus LoginRequiredMixin
         nutzer = self.request.user
         if not hasattr(nutzer, 'person'):
+            #spam
+
+            if not hasattr(nutzer.profil, 'vorname'):
+                self.messages.info('Du musst mindestens einen Vornamen angeben, um Teilnahmen eintragen zu können.')
+                return HttpResponseRedirect(reverse('Nutzer:meine_daten'))
+
             self.person = models.Person.erstellen(nutzer)
         else:
             self.person = nutzer.person

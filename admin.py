@@ -2,9 +2,15 @@ from django.contrib import admin
 
 from . import models
 
+
+class ErfolgAdmin(admin.ModelAdmin):
+    list_display = ('person', 'wettbewerb')
+    # readonly_fields = ['pk']
+    list_filter = ('person', 'wettbewerb')
+
 admin.site.register(models.Person)
 admin.site.register(models.Teilnahme)
-admin.site.register(models.Erfolg)
+admin.site.register(models.Erfolg, ErfolgAdmin)
 admin.site.register(models.ArtTeilnahme)
 admin.site.register(models.ArtErfolg)
 admin.site.register(models.ArtVeranstaltung)

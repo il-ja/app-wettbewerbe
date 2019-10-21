@@ -4,7 +4,7 @@
 {% block content %}
 <h2>{% listeneintrag veranstaltung request %}</h2>
   <p>{{ veranstaltung.datum_anfang }} - {{ veranstaltung.datum_ende }} </p>
-  <p>{{ veranstaltung.beschreibung }}</p>
+  <p>{{ veranstaltung.description }}</p>
   <p>Es {% null_ein_viele veranstaltung.teilnahmen.count %} an der Veranstaltung bekannt:</p>
   <ul>
     {% for t in veranstaltung.teilnahmen.all %}
@@ -18,7 +18,9 @@
          {% listeneintrag t request True %}
       </li>
     {% endfor %}
-    <li><a style="color: gray;" href="mich_eintragen/">[meine Teilnahme eintragen]</a></li>
+    {% if not request.user.person in veranstaltung.personen.all %}
+      <li><a style="color: gray;" href="mich_eintragen/">[meine Teilnahme eintragen]</a></li>
+    {% endif %}
   </ul>
   {% if veranstaltung.wettbewerbe.all %}
   <p>Es sind folgende Wettbewerbe bei dieser Veranstaltung ausgetragen worden</p>
@@ -36,7 +38,7 @@
               {% else %}
                 {{ e.nur_name }}
               {% endif %}
-               - {{ e.name }}{% listeneintrag e request True %}
+               - {{ e.art }}{% listeneintrag e request True %}
             </li>
           {% endfor %}
         </ul>

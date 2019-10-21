@@ -9,15 +9,17 @@
     {% for e in wettbewerb.erfolge.all %}
       <li>
         {% if e.person %}
-        <a href="{% url 'Wettbewerbe:eine_person' e.person.pk %}">{{ e.person.name }}</a>
+          {% listeneintrag e.person request %}
         {% else %}
           {{ e.nur_name }}
         {% endif %}
-         - {{ e.name }}
-         {% listeneintrag e request True %}
+         - {{ e.art }}
+        {% listeneintrag e request True %}
       </li>
     {% endfor %}
-    <li><a style="color: gray;" href="mich_eintragen/">[meinen Erfolg eintragen]</a></li>
+    {% if not request.user.person in wettbewerb.personen.all %}
+      <li><a style="color: gray;" href="mich_eintragen/">[meinen Erfolg eintragen]</a></li>
+    {% endif %}
   </ul>
 
   {# Links zur Veranstaltung und anderen Wettbewerben der Veranstaltung #}

@@ -267,9 +267,18 @@ class Verknuepfung(TimeStampedModel):
         name = self.person or self.nur_name or '?'
         return '{} - {}'.format(name, self.objekt)
 
-    @property
     def title(self):
-        return "%s -> %s" % (self.person.name or self.nur_name, getattr(self, self.verknuepft[0]).title)
+        return "%s -> %s" % (self.name, self.objekt.title)
+
+    @property
+    def listeneintrag(self, obadmin=False):
+        """ wird vom Templatetag listeneintrag verwendet, statt des
+        per default konstruierten. Hier nötig, weil es zwei Links sein
+        sollen, nicht wie meist nur text+link
+        obadmin ist noch nicht implementiert, TODO """
+        person = self.nur_name or '<a href="%s">%s</a>' % (self.person.get_absolute_url(), self.person.name)
+        objekt = '<a href="%s">%s</a>' % (self.objekt.get_absolute_url(), self.objekt.title)
+        return "%s - %s" % (person, objekt)
 
     def save(self, *args, **kwargs):
         """ Führt vor dem save() Validierungen durch """
@@ -365,12 +374,13 @@ class Erfolg(Verknuepfung):
     verknuepft = ('wettbewerb', WettbewerbKonkret)
 
     @property
-    def name(self):
-        if self.zusatz:
-            return "%s, %s" % (self.art.title, self.zusatz)
-        else:
-            return self.art.title
-
+    def title(self):
+        return "%s, %s - %s%s" % (
+            self.name,
+            self.objekt.title,
+            self.art.title,
+            ', '+self.zusatz if self.zusatz else '',
+        )
 
     @classmethod
     def neu_zu_objekt(cls, objekt):
